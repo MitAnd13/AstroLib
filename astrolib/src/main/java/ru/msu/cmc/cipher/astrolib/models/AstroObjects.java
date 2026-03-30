@@ -69,8 +69,16 @@ public class AstroObjects implements CommonEntity<Long>{
     @Column(name = "planet_type")
     private String planet_type;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "planet_parent_star")
+    private AstroObjects planet_parent_star;
+
     @Column(name = "satellite_type")
     private String satellite_type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "satellite_parent_planet")
+    private AstroObjects satellite_parent_planet;
 
     @Column(name = "asteroid_spectre")
     private String asteroid_spectre;

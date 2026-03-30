@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "objects")
+@Table(name = "astro_objects")
 @Getter
 @Setter
 @ToString

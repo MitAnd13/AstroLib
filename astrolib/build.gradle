@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '4.0.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -30,11 +31,63 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+jacoco {
+	toolVersion = '0.8.12'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy tasks.named('jacocoTestReport')
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn tasks.named('test')
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+	}
+	doLast {
+		def reportFile = layout.buildDirectory.file('reports/jacoco/test/jacocoTestReport.xml').get().asFile
+		if (!reportFile.exists()) {
+			println 'JaCoCo report was not generated.'
+			return
+		}
+
+		def reportText = reportFile.getText('UTF-8')
+
+		def extractCounter = { type ->
+			def matcher = reportText =~ /<counter type="${type}" missed="(\d+)" covered="(\d+)"\/>/
+			return matcher.find() ? [missed: matcher.group(1) as BigDecimal, covered: matcher.group(2) as BigDecimal] : null
+		}
+
+		def lineCounter = extractCounter('LINE')
+		def branchCounter = extractCounter('BRANCH')
+
+		def formatCoverage = { counter ->
+			if (counter == null) {
+				return 'n/a'
+			}
+			def missed = counter.missed
+			def covered = counter.covered
+			def total = missed + covered
+			if (total == 0) {
+				return 'n/a'
+			}
+			return String.format('%.2f%%', (covered * 100 / total).doubleValue())
+		}
+
+		println ''
+		println 'JaCoCo coverage summary:'
+		println "  Line coverage:   ${formatCoverage(lineCounter)}"
+		println "  Branch coverage: ${formatCoverage(branchCounter)}"
+		println "  HTML report:     ${layout.buildDirectory.dir('reports/jacoco/test/html').get().asFile}"
+	}
 }

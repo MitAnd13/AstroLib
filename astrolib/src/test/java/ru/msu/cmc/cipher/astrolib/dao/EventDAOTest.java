@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -106,5 +108,35 @@ class EventDAOTest {
             object.getId(), LocalDate.of(2026, 5, 2), LocalDate.of(2026, 5, 2)
         ).size());
         assertEquals(2, eventDAO.getByDateRange(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 30)).size());
+    }
+
+    @Test
+    void emptyAndNullLinkBranchesShouldWork() {
+        assertNull(eventDAO.getByName("Missing event"));
+        assertFalse(eventDAO.existsByName("Missing event"));
+        assertEquals(0, eventDAO.getByNameLike("Missing").size());
+        assertEquals(0, eventDAO.getByType("Missing").size());
+        assertEquals(0, eventDAO.getByDateRange(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 1, 2)).size());
+        assertEquals(0, eventDAO.getByObjectId(99999L).size());
+        assertEquals(0, eventDAO.getByObjectIdAndDateRange(99999L, LocalDate.of(2030, 1, 1), LocalDate.of(2030, 1, 2)).size());
+        assertEquals(0, eventDAO.getObjectLinks(99999L).size());
+
+        Events event = new Events("Empty links event", "Test");
+        event.setStart_date(LocalDate.of(2026, 1, 1));
+        event.setEnd_date(LocalDate.of(2026, 1, 1));
+        eventDAO.insert(event, null);
+        entityManager.flush();
+        entityManager.clear();
+
+        Events saved = eventDAO.getByName("Empty links event");
+        assertNotNull(saved);
+        assertEquals(0, eventDAO.getObjectLinks(saved.getId()).size());
+
+        saved.setType("Updated test");
+        eventDAO.update(saved, null);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals("Updated test", eventDAO.getByName("Empty links event").getType());
     }
 }

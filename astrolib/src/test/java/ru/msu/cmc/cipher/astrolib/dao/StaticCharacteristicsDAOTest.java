@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -142,5 +143,77 @@ class StaticCharacteristicsDAOTest {
         entityManager.clear();
 
         assertEquals(0, staticCharacteristicsDAO.getAll().size());
+    }
+
+    @Test
+    void emptyAndInvalidStaticCharacteristicsBranchesShouldWork() {
+        assertEquals(0, staticCharacteristicsDAO.getByFilters(
+            AstroObjects.ObjType.STAR, 100f, 200f, null, null, null, null, "Missing"
+        ).size());
+        assertEquals(0, staticCharacteristicsDAO.getByObjectType(AstroObjects.ObjType.GALAXY).size());
+        assertEquals(0, staticCharacteristicsDAO.getAllWithObjects().size());
+        assertEquals(0, staticCharacteristicsDAO.getAll().size());
+        assertEquals(null, staticCharacteristicsDAO.getByObjectId(54321L));
+
+        InvalidDataAccessApiUsageException nullReferenceException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> staticCharacteristicsDAO.insertForObject(new StaticCharacteristics(1.0f, 1.0f, 1L, "None"))
+        );
+        assertEquals("Static characteristics must reference an existing object", nullReferenceException.getMessage());
+
+        AstroObjects missingObject = new AstroObjects("MissingStatic", AstroObjects.ObjType.STAR);
+        missingObject.setId(99998L);
+        StaticCharacteristics missingCharacteristics = new StaticCharacteristics(1.0f, 1.0f, 1L, "None");
+        missingCharacteristics.setObject(missingObject);
+
+        InvalidDataAccessApiUsageException missingObjectException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> staticCharacteristicsDAO.insertForObject(missingCharacteristics)
+        );
+        assertEquals("Referenced object does not exist", missingObjectException.getMessage());
+    }
+
+    @Test
+    void staticCharacteristicsShouldCoverNullTypeAndNullIdBranches() {
+        AstroObjects star = new AstroObjects("BranchStar", AstroObjects.ObjType.STAR);
+        star.setStar_spectre('G');
+        astroObjectDAO.insertTyped(star);
+
+        StaticCharacteristics characteristics = new StaticCharacteristics(12.0f, 13.0f, 14L, "BranchConstellation");
+        characteristics.setObject(star);
+        staticCharacteristicsDAO.insertForObject(characteristics);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(1, staticCharacteristicsDAO.getByFilters(
+            null, null, null, null, null, null, null, null
+        ).size());
+
+        StaticCharacteristics nullObjectCharacteristics = new StaticCharacteristics(1.0f, 1.0f, 1L, "None");
+        InvalidDataAccessApiUsageException nullObjectException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> staticCharacteristicsDAO.insertForObject(nullObjectCharacteristics)
+        );
+        assertEquals("Static characteristics must reference an existing object", nullObjectException.getMessage());
+
+        AstroObjects objectWithoutId = new AstroObjects("NoIdStatic", AstroObjects.ObjType.STAR);
+        StaticCharacteristics noIdCharacteristics = new StaticCharacteristics(1.0f, 1.0f, 1L, "None");
+        noIdCharacteristics.setObject(objectWithoutId);
+
+        InvalidDataAccessApiUsageException noIdException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> staticCharacteristicsDAO.insertForObject(noIdCharacteristics)
+        );
+        assertEquals("Static characteristics must reference an existing object", noIdException.getMessage());
+        assertNull(staticCharacteristicsDAO.getByObjectId(88888L));
+    }
+
+    @Test
+    void staticCharacteristicsShouldRejectNullCharacteristics() {
+        InvalidDataAccessApiUsageException exception = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> staticCharacteristicsDAO.insertForObject(null)
+        );
+        assertEquals("Static characteristics must reference an existing object", exception.getMessage());
     }
 }

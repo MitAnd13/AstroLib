@@ -237,4 +237,121 @@ class AstroObjectDAOTest {
         assertEquals(1, filtered.size());
         assertEquals("Lagoon", filtered.iterator().next().getName());
     }
+
+    @Test
+    void emptySearchesAndDeleteBranchesShouldWork() {
+        assertNull(astroObjectDAO.getByName("Missing object"));
+        assertTrue(!astroObjectDAO.existsByName("Missing object"));
+        assertEquals(0, astroObjectDAO.getByNameLike("Missing").size());
+        assertEquals(0, astroObjectDAO.getStarsByFilters('O', "Impossible", 99).size());
+        assertEquals(0, astroObjectDAO.getNebulaeByFilters("Unknown").size());
+        assertEquals(0, astroObjectDAO.getGalaxiesByFilters("Unknown").size());
+        assertEquals(0, astroObjectDAO.getPlanetsByFilters("Unknown", 999L).size());
+        assertEquals(0, astroObjectDAO.getSatellitesByFilters("Unknown", 999L).size());
+        assertEquals(0, astroObjectDAO.getAsteroidsByFilters("Unknown", "Unknown").size());
+        assertEquals(0, astroObjectDAO.getCometsByFilters("Unknown", "Unknown").size());
+        assertEquals(0, astroObjectDAO.getMeteorShowersByFilters("Unknown", 999L).size());
+
+        AstroObjects star = new AstroObjects("ManagedDeleteStar", AstroObjects.ObjType.STAR);
+        astroObjectDAO.insert(star);
+        entityManager.flush();
+
+        AstroObjects managed = astroObjectDAO.getById(star.getId());
+        astroObjectDAO.delete(managed);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertNull(astroObjectDAO.getById(star.getId()));
+
+        astroObjectDAO.deleteById(999999L);
+    }
+
+    @Test
+    void insertTypedShouldRejectInvalidInputs() {
+        InvalidDataAccessApiUsageException nullObjectException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(null)
+        );
+        assertEquals("Object must not be null", nullObjectException.getMessage());
+
+        AstroObjects objectWithoutType = new AstroObjects();
+        objectWithoutType.setName("NoType");
+
+        InvalidDataAccessApiUsageException nullTypeException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(objectWithoutType)
+        );
+        assertEquals("Object type must not be null", nullTypeException.getMessage());
+
+        AstroObjects starWithoutId = new AstroObjects("DetachedStar", AstroObjects.ObjType.STAR);
+        AstroObjects invalidPlanet = new AstroObjects("ParentWithoutId", AstroObjects.ObjType.PLANET);
+        invalidPlanet.setPlanet_type("Test");
+        invalidPlanet.setPlanet_parent_star(starWithoutId);
+
+        InvalidDataAccessApiUsageException parentWithoutIdException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(invalidPlanet)
+        );
+        assertEquals("Planet parent must be a star", parentWithoutIdException.getMessage());
+    }
+
+    @Test
+    void insertTypedShouldRejectInvalidSatelliteAndMeteorParents() {
+        AstroObjects star = new AstroObjects("ParentForSatellite", AstroObjects.ObjType.STAR);
+        astroObjectDAO.insertTyped(star);
+
+        AstroObjects planet = new AstroObjects("ParentForMeteor", AstroObjects.ObjType.PLANET);
+        planet.setPlanet_type("Test");
+        astroObjectDAO.insertTyped(planet);
+
+        AstroObjects invalidSatellite = new AstroObjects("InvalidSatellite", AstroObjects.ObjType.SATELLITE);
+        invalidSatellite.setSatellite_type("Natural");
+        invalidSatellite.setSatellite_parent_planet(star);
+
+        InvalidDataAccessApiUsageException satelliteException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(invalidSatellite)
+        );
+        assertEquals("Satellite parent must be a planet", satelliteException.getMessage());
+
+        AstroObjects invalidMeteor = new AstroObjects("InvalidMeteor", AstroObjects.ObjType.METEOR_SHOWER);
+        invalidMeteor.setMeteor_shower_intensity("High");
+        invalidMeteor.setMeteor_shower_parent(planet);
+
+        InvalidDataAccessApiUsageException meteorException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(invalidMeteor)
+        );
+        assertEquals("Meteor shower parent must be a comet", meteorException.getMessage());
+    }
+
+    @Test
+    void insertTypedShouldRejectMissingManagedParent() {
+        AstroObjects missingStar = new AstroObjects("MissingParent", AstroObjects.ObjType.STAR);
+        missingStar.setId(424242L);
+
+        AstroObjects invalidPlanet = new AstroObjects("PlanetWithMissingParent", AstroObjects.ObjType.PLANET);
+        invalidPlanet.setPlanet_type("Test");
+        invalidPlanet.setPlanet_parent_star(missingStar);
+
+        InvalidDataAccessApiUsageException exception = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> astroObjectDAO.insertTyped(invalidPlanet)
+        );
+        assertEquals("Planet parent must be a star", exception.getMessage());
+    }
+
+    @Test
+    void deleteShouldWorkForDetachedEntity() {
+        AstroObjects star = new AstroObjects("DetachedDeleteStar", AstroObjects.ObjType.STAR);
+        astroObjectDAO.insert(star);
+        entityManager.flush();
+        entityManager.clear();
+
+        astroObjectDAO.delete(star);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertNull(astroObjectDAO.getById(star.getId()));
+    }
 }

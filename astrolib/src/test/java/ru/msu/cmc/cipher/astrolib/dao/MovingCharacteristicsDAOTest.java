@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -142,5 +143,99 @@ class MovingCharacteristicsDAOTest {
         entityManager.clear();
 
         assertEquals(0, movingCharacteristicsDAO.getAll().size());
+    }
+
+    @Test
+    void emptyAndInvalidMovingCharacteristicsBranchesShouldWork() {
+        assertEquals(0, movingCharacteristicsDAO.getByFilters(
+            AstroObjects.ObjType.COMET, 999L, 1000L, null, null, null, null, null, null, null, null, null, null
+        ).size());
+        assertEquals(0, movingCharacteristicsDAO.getByObjectType(AstroObjects.ObjType.COMET).size());
+        assertEquals(0, movingCharacteristicsDAO.getAllWithObjects().size());
+        assertEquals(0, movingCharacteristicsDAO.getAll().size());
+        assertEquals(null, movingCharacteristicsDAO.getByObjectId(12345L));
+
+        InvalidDataAccessApiUsageException nullReferenceException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> movingCharacteristicsDAO.insertForObject(new MovingCharacteristics(1L, 0.1f, 1.0f, 1.0f, 1, 1, 1, 1))
+        );
+        assertEquals("Moving characteristics must reference an existing object", nullReferenceException.getMessage());
+
+        AstroObjects missingObject = new AstroObjects("MissingMoving", AstroObjects.ObjType.COMET);
+        missingObject.setId(99999L);
+        MovingCharacteristics missingCharacteristics = new MovingCharacteristics(1L, 0.1f, 1.0f, 1.0f, 1, 1, 1, 1);
+        missingCharacteristics.setObject(missingObject);
+
+        InvalidDataAccessApiUsageException missingObjectException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> movingCharacteristicsDAO.insertForObject(missingCharacteristics)
+        );
+        assertEquals("Referenced object does not exist", missingObjectException.getMessage());
+    }
+
+    @Test
+    void movingCharacteristicsShouldCoverNullTypeAndNullIdBranches() {
+        AstroObjects comet = new AstroObjects("BranchComet", AstroObjects.ObjType.COMET);
+        comet.setComet_type("Periodic");
+        astroObjectDAO.insertTyped(comet);
+
+        MovingCharacteristics characteristics = new MovingCharacteristics(14L, 0.3f, 2.0f, 15.0f, 5, 10, 1, 2);
+        characteristics.setObject(comet);
+        movingCharacteristicsDAO.insertForObject(characteristics);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(1, movingCharacteristicsDAO.getByFilters(
+            null, null, null, null, null, null, null, null, null, null, null, null, null
+        ).size());
+
+        MovingCharacteristics nullObjectCharacteristics = new MovingCharacteristics(1L, 0.1f, 1.0f, 1.0f, 1, 1, 1, 1);
+        InvalidDataAccessApiUsageException nullObjectException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> movingCharacteristicsDAO.insertForObject(nullObjectCharacteristics)
+        );
+        assertEquals("Moving characteristics must reference an existing object", nullObjectException.getMessage());
+
+        AstroObjects objectWithoutId = new AstroObjects("NoIdMoving", AstroObjects.ObjType.COMET);
+        MovingCharacteristics noIdCharacteristics = new MovingCharacteristics(1L, 0.1f, 1.0f, 1.0f, 1, 1, 1, 1);
+        noIdCharacteristics.setObject(objectWithoutId);
+
+        InvalidDataAccessApiUsageException noIdException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> movingCharacteristicsDAO.insertForObject(noIdCharacteristics)
+        );
+        assertEquals("Moving characteristics must reference an existing object", noIdException.getMessage());
+        assertNull(movingCharacteristicsDAO.getByObjectId(77777L));
+    }
+
+    @Test
+    void movingCharacteristicsShouldRejectNullCharacteristicsAndSupportOtherMovingTypes() {
+        InvalidDataAccessApiUsageException nullCharacteristicsException = assertThrows(
+            InvalidDataAccessApiUsageException.class,
+            () -> movingCharacteristicsDAO.insertForObject(null)
+        );
+        assertEquals("Moving characteristics must reference an existing object", nullCharacteristicsException.getMessage());
+
+        AstroObjects satellite = new AstroObjects("CoverageSatellite", AstroObjects.ObjType.SATELLITE);
+        satellite.setSatellite_type("Natural");
+        astroObjectDAO.insertTyped(satellite);
+
+        MovingCharacteristics satelliteCharacteristics = new MovingCharacteristics(21L, 0.2f, 4.0f, 11.0f, 3, 7, 1, 2);
+        satelliteCharacteristics.setObject(satellite);
+        movingCharacteristicsDAO.insertForObject(satelliteCharacteristics);
+
+        AstroObjects meteor = new AstroObjects("CoverageMeteor", AstroObjects.ObjType.METEOR_SHOWER);
+        meteor.setMeteor_shower_intensity("Medium");
+        astroObjectDAO.insertTyped(meteor);
+
+        MovingCharacteristics meteorCharacteristics = new MovingCharacteristics(31L, 0.4f, 6.0f, 22.0f, 4, 9, 0, 1);
+        meteorCharacteristics.setObject(meteor);
+        movingCharacteristicsDAO.insertForObject(meteorCharacteristics);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(1, movingCharacteristicsDAO.getByObjectType(AstroObjects.ObjType.SATELLITE).size());
+        assertEquals(1, movingCharacteristicsDAO.getByObjectType(AstroObjects.ObjType.METEOR_SHOWER).size());
     }
 }

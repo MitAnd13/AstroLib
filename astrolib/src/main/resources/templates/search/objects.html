@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск объектов по фильтрам | Astrolib</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-shell">
+    <section class="search-shell">
+        <div class="form-page-head">
+            <a class="back-link" th:href="@{/}"><span aria-hidden="true">&lt;</span> На главную</a>
+            <p class="eyebrow">Поиск объектов</p>
+            <h1 class="search-title">Отберите объекты по типу и характеристикам</h1>
+            <p class="search-subtitle">Сначала выберите тип объекта, затем заполняйте только нужные фильтры. Пустые поля в поиске игнорируются.</p>
+        </div>
+
+        <form class="search-form-panel" th:action="@{/search/objects}" th:object="${filterForm}" method="get">
+            <section class="form-section">
+                <div class="section-caption">
+                    <h2>Базовый фильтр</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field">
+                        <span>Тип объекта</span>
+                        <select th:field="*{objectKind}">
+                            <option value="">Выберите тип</option>
+                            <option value="star">Звезда</option>
+                            <option value="nebula">Туманность</option>
+                            <option value="galaxy">Галактика</option>
+                            <option value="planet">Планета</option>
+                            <option value="satellite">Спутник</option>
+                            <option value="asteroid">Астероид</option>
+                            <option value="comet">Комета</option>
+                            <option value="meteor_shower">Метеорный поток</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="section-caption">
+                    <h2>Типоспецифичные фильтры</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field"><span>Класс звезды</span><input type="text" th:field="*{starSpectre}" placeholder="O, B, A, F..."></label>
+                    <label class="field"><span>Светимость звезды</span><input type="text" th:field="*{starLight}" placeholder="Ia, III, V"></label>
+                    <label class="field"><span>Компоненты звезды</span><input type="number" th:field="*{starCount}" placeholder="1"></label>
+                    <label class="field"><span>Тип туманности</span><input type="text" th:field="*{nebulaType}" placeholder="Эмиссионная"></label>
+                    <label class="field"><span>Тип галактики</span><input type="text" th:field="*{galaxyType}" placeholder="Спиральная"></label>
+                    <label class="field"><span>Тип планеты</span><input type="text" th:field="*{planetType}" placeholder="Суперземля"></label>
+                    <label class="field"><span>Родительская звезда</span><input type="text" th:field="*{planetParentStar}" placeholder="Sun"></label>
+                    <label class="field"><span>Тип спутника</span><input type="text" th:field="*{satelliteType}" placeholder="Регулярный"></label>
+                    <label class="field"><span>Родительская планета</span><input type="text" th:field="*{satelliteParentPlanet}" placeholder="Earth"></label>
+                    <label class="field"><span>Класс астероида</span><input type="text" th:field="*{asteroidSpectre}" placeholder="C, S, M"></label>
+                    <label class="field"><span>Группа астероида</span><input type="text" th:field="*{asteroidGroup}" placeholder="Главный пояс"></label>
+                    <label class="field"><span>Тип кометы</span><input type="text" th:field="*{cometType}" placeholder="Короткопериодическая"></label>
+                    <label class="field"><span>Класс кометы</span><input type="text" th:field="*{cometClass}" placeholder="Семейство Юпитера"></label>
+                    <label class="field"><span>Интенсивность потока</span><input type="text" th:field="*{meteorIntensity}" placeholder="Сильная"></label>
+                    <label class="field"><span>Комета-прародитель</span><input type="text" th:field="*{meteorParentComet}" placeholder="Halley"></label>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="section-caption">
+                    <h2>Фильтры неподвижных тел</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field"><span>RA от</span><input type="number" step="any" th:field="*{minRightAscension}"></label>
+                    <label class="field"><span>RA до</span><input type="number" step="any" th:field="*{maxRightAscension}"></label>
+                    <label class="field"><span>Склонение от</span><input type="number" step="any" th:field="*{minDeclension}"></label>
+                    <label class="field"><span>Склонение до</span><input type="number" step="any" th:field="*{maxDeclension}"></label>
+                    <label class="field"><span>Расстояние от</span><input type="number" th:field="*{minSunDistance}"></label>
+                    <label class="field"><span>Расстояние до</span><input type="number" th:field="*{maxSunDistance}"></label>
+                    <label class="field"><span>Созвездие</span><input type="text" th:field="*{constellation}" placeholder="Орион"></label>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="section-caption">
+                    <h2>Фильтры подвижных тел</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field"><span>Полуось от</span><input type="number" th:field="*{minSemiaxis}"></label>
+                    <label class="field"><span>Полуось до</span><input type="number" th:field="*{maxSemiaxis}"></label>
+                    <label class="field"><span>Эксцентриситет от</span><input type="number" step="any" th:field="*{minEccentricity}"></label>
+                    <label class="field"><span>Эксцентриситет до</span><input type="number" step="any" th:field="*{maxEccentricity}"></label>
+                    <label class="field"><span>Наклонение от</span><input type="number" step="any" th:field="*{minInclination}"></label>
+                    <label class="field"><span>Наклонение до</span><input type="number" step="any" th:field="*{maxInclination}"></label>
+                    <label class="field"><span>Долгота угла от</span><input type="number" step="any" th:field="*{minLongitudeOfAscAngle}"></label>
+                    <label class="field"><span>Долгота угла до</span><input type="number" step="any" th:field="*{maxLongitudeOfAscAngle}"></label>
+                    <label class="field"><span>Скорость от</span><input type="number" th:field="*{minVelocity}"></label>
+                    <label class="field"><span>Скорость до</span><input type="number" th:field="*{maxVelocity}"></label>
+                    <label class="field"><span>Светимость от</span><input type="number" th:field="*{minLight}"></label>
+                    <label class="field"><span>Светимость до</span><input type="number" th:field="*{maxLight}"></label>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button class="button-submit" type="submit">Применить фильтры</button>
+            </div>
+        </form>
+
+        <div class="search-empty" th:if="${!hasType}">
+            Выберите тип объекта и задайте фильтры для поиска.
+        </div>
+
+        <section class="result-panel" th:if="${hasType}">
+            <div class="result-panel-head">
+                <h2>Результаты поиска</h2>
+                <p th:text="'Найдено: ' + ${#lists.size(objectResults)}">Найдено: 0</p>
+            </div>
+            <div class="result-list" th:if="${!#lists.isEmpty(objectResults)}">
+                <article class="result-card" th:each="item : ${objectResults}">
+                    <div class="result-card-head">
+                        <h3 th:text="${item.name}">Object</h3>
+                        <span class="result-badge" th:text="${item.type}">TYPE</span>
+                    </div>
+                    <p class="result-meta" th:text="${'Каталог: ' + (item.catalog_id != null ? item.catalog_id : 'нет данных')}">Каталог</p>
+                    <p class="result-meta" th:text="${'Дата открытия: ' + (item.found_date != null ? item.found_date : 'нет данных')}">Дата</p>
+                    <p class="result-meta" th:text="${'Первооткрыватель: ' + (item.found_name != null ? item.found_name : 'нет данных')}">Первооткрыватель</p>
+                    <p class="result-meta" th:text="${'Масса: ' + (item.mass != null ? item.mass : 'нет данных')}">Масса</p>
+                    <p class="result-notes" th:text="${item.notes != null ? item.notes : 'Комментарий отсутствует'}">Комментарий</p>
+                </article>
+            </div>
+            <div class="search-empty" th:if="${#lists.isEmpty(objectResults)}">
+                По этим фильтрам ничего не найдено.
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

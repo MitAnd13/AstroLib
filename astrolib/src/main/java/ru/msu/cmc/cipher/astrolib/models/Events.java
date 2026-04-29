@@ -35,4 +35,7 @@ public class Events implements CommonEntity<Long>{
 
     @Column(name = "eve_end")
     private LocalDate end_date = LocalDate.now();
+
+    @Column(name = "eve_notes")
+    private String notes = "нет данных";
 }

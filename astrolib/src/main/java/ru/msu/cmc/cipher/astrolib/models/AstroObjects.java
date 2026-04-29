@@ -4,10 +4,11 @@ import lombok.*;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "astro_objects")
+@Table(name = "objects")
 @Getter
 @Setter
 @ToString
@@ -49,7 +50,10 @@ public class AstroObjects implements CommonEntity<Long>{
     private String found_name = "cipher :3";
 
     @Column(name = "obj_mass")
-    private Long mass = Long.valueOf(-1); //undefined
+    private BigDecimal mass = BigDecimal.valueOf(-1); //undefined
+
+    @Column(name = "obj_notes")
+    private String notes = "нет данных";
 
     @Column(name = "star_spectre")
     private Character star_spectre;

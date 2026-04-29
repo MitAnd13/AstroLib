@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astrolib</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-shell">
+    <div class="top-actions">
+        <a class="action-card" th:each="action : ${quickActions}" th:href="${action.href}" th:classappend="' accent-' + ${action.accent}">
+            <span class="action-icon"><img class="action-icon-image" th:src="${action.icon}" th:alt="${action.title}"></span>
+            <div class="action-copy">
+                <h2 th:text="${action.title}">Поиск по названию</h2>
+                <p th:text="${action.description}">Найти объект или явление по названию или идентификатору каталога.</p>
+            </div>
+        </a>
+    </div>
+
+    <section class="hero-panel">
+        <div class="space-decor decor-left" aria-hidden="true">
+            <span class="planet planet-small"></span>
+            <span class="orbit orbit-left"></span>
+            <span class="orbit-body orbit-body-left"></span>
+            <span class="star-cluster"></span>
+        </div>
+
+        <div class="hero-core">
+            <p class="eyebrow">Астрономический каталог</p>
+            <h1>Поиск, анализ и регистрация неземных открытий в одном интерфейсе</h1>
+            <p class="hero-copy">
+                Главная страница работает как центр управления полётами: быстрый переход к поиску по названию,
+                поиску объектов и явлений по фильтрам, а также к регистрации нового открытия
+            </p>
+
+            <div class="stats-grid">
+                <article class="stat-card" th:each="stat : ${stats}">
+                    <span class="stat-label" th:text="${stat.label}">Объектов в каталоге</span>
+                    <strong th:text="${stat.value}">12 480</strong>
+                </article>
+            </div>
+        </div>
+
+        <div class="space-decor decor-right" aria-hidden="true">
+            <span class="planet planet-large"></span>
+            <span class="orbit orbit-right"></span>
+            <span class="orbit-body orbit-body-right"></span>
+            <span class="star-trail"></span>
+        </div>
+    </section>
+
+    <section class="bottom-strip">
+        <article class="strip-card">
+            <p class="strip-title">Написано</p>
+            <p>В рамках сдачи WEB-Практикума студентом 327 группы кафедры СП факультета ВМК МГУ в 2026 году.</p>
+        </article>
+        <article class="strip-card">
+            <p class="strip-title">В планах</p>
+            <p>Расширение базы данных, добавление новых характеристик для более гибкой фильтрации, внедрение функции обновления данных.</p>
+        </article>
+        <article class="strip-card">
+            <p class="strip-title">Контакты</p>
+            <p>ТГ: @MitAnd13</p>
+            <p>Почта: s02230190@gse.cs.msu.ru</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>
+

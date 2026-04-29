@@ -11,6 +11,9 @@
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
     <assistants>
+      <assistant-state connection-id="29688235-3220-4afc-85cf-4d41930f23b2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+        <tools />
+      </assistant-state>
       <assistant-state connection-id="29688235-3220-4afc-85cf-4d41930f23b2" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="7B5E4CD6BFC144D3AFFD257680425552" availability="AVAILABLE" acknowledgement="ENGAGED" selected="true">
         <chats>
           <chat id="7B5E4CD6BFC144D3AFFD257680425552" title="" session-signature="" timestamp="1774095924972">
@@ -18,9 +21,6 @@
             <context provider="" profile="" model="" action="" interactive="true" />
           </chat>
         </chats>
-        <tools />
-      </assistant-state>
-      <assistant-state connection-id="29688235-3220-4afc-85cf-4d41930f23b2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
     </assistants>
@@ -38,14 +38,18 @@
     <connection id="29688235-3220-4afc-85cf-4d41930f23b2">
       <console name="Connection" type="STANDARD" schema="astrolib" session="Main" />
       <console name="DB_Connection" type="STANDARD" schema="public" session="Main"><![CDATA[DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;]]></console>
+CREATE SCHEMA public;
+
+select * FROM objects;]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files />
+    <open-files>
+      <object connection-id="29688235-3220-4afc-85cf-4d41930f23b2" object-ref="consoles/DB_Connection" />
+    </open-files>
   </component>
   <component name="DBNavigator.Project.DatabasePrerequisiteManager">
     <prerequisites />
@@ -54,6 +58,7 @@ CREATE SCHEMA public;]]></console>
     <connection id="29688235-3220-4afc-85cf-4d41930f23b2" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="29688235-3220-4afc-85cf-4d41930f23b2" dataset="public.astro_objects" active-filter-id="" />
     <filter-actions connection-id="29688235-3220-4afc-85cf-4d41930f23b2" dataset="public.objects" active-filter-id="d70b6334-3244-49c5-9cca-5e1d5b266397">
       <filter id="d70b6334-3244-49c5-9cca-5e1d5b266397" name="Filter" temporary="false" custom-name="false" type="basic" join-type="AND" />
     </filter-actions>
@@ -340,19 +345,13 @@ CREATE SCHEMA public;]]></console>
           <content-type name="DTD" enabled="true" />
           <content-type name="HTML" enabled="true" />
           <content-type name="XHTML" enabled="true" />
-          <content-type name="CSS" enabled="true" />
           <content-type name="Java" enabled="true" />
           <content-type name="SQL" enabled="true" />
           <content-type name="PL/SQL" enabled="true" />
           <content-type name="JPA QL" enabled="true" />
-          <content-type name="JavaScript" enabled="true" />
           <content-type name="JSON" enabled="true" />
           <content-type name="JSON5" enabled="true" />
-          <content-type name="JSP" enabled="true" />
-          <content-type name="JSPx" enabled="true" />
           <content-type name="Groovy" enabled="true" />
-          <content-type name="FTL" enabled="true" />
-          <content-type name="VTL" enabled="true" />
           <content-type name="YAML" enabled="true" />
           <content-type name="Manifest" enabled="true" />
         </content-types>

@@ -5,11 +5,12 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 public class DiscoveryForm {
-    // маппинг полей HTML формы с будущими атрибутами в таблицах БД
     private String discoveryKind = "object";
 
     private String name;
@@ -52,6 +53,15 @@ public class DiscoveryForm {
     private Integer maxVelocity;
     private Integer minLight;
     private Integer maxLight;
+
+    private String eventType;
+    private String periodicity;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate eventStart;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate eventEnd;
+    private List<String> linkedObjectNames = new ArrayList<>();
+    private List<String> linkedObjectRoles = new ArrayList<>();
 
     private String notes;
 }

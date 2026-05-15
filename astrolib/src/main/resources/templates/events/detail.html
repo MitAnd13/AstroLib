@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${event.name + ' | Astrolib'}">Event | Astrolib</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-shell">
+    <section class="form-page">
+        <div class="form-page-head">
+            <a class="back-link" th:href="@{/search/events}"><span aria-hidden="true">&lt;</span> К поиску явлений</a>
+            <p class="eyebrow">Карточка явления</p>
+            <h1 class="form-page-title" th:text="${event.name}">Solar eclipse</h1>
+            <p class="form-page-copy" th:text="${event.notes != null ? event.notes : 'Комментарий отсутствует'}">Описание явления</p>
+        </div>
+
+        <div class="discovery-layout">
+            <section class="form-panel">
+                <section class="form-section">
+                    <div class="section-caption">
+                        <h2>Основные сведения</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="field"><span>Тип</span><input type="text" th:value="${event.type}" readonly></div>
+                        <div class="field"><span>Периодичность</span><input type="text" th:value="${event.catalog_id}" readonly></div>
+                        <div class="field"><span>Дата начала</span><input type="text" th:value="${event.start_date}" readonly></div>
+                        <div class="field"><span>Дата окончания</span><input type="text" th:value="${event.end_date}" readonly></div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-caption">
+                        <h2>Связанные объекты</h2>
+                    </div>
+                    <div class="result-list" th:if="${!#lists.isEmpty(links)}">
+                        <a class="result-card result-card-link" th:each="link : ${links}" th:href="@{/objects/{id}(id=${link.object.id})}">
+                            <div class="result-card-head">
+                                <h3 th:text="${link.object.name}">Object</h3>
+                                <span class="result-badge" th:text="${link.object.type}">TYPE</span>
+                            </div>
+                            <p class="result-meta" th:text="${'Роль: ' + link.role}">Роль</p>
+                            <p class="result-meta" th:text="${'Каталог: ' + (link.object.catalog_id != null ? link.object.catalog_id : 'нет данных')}">Каталог</p>
+                            <p class="result-notes" th:text="${link.object.notes != null ? link.object.notes : 'Комментарий отсутствует'}">Комментарий</p>
+                        </a>
+                    </div>
+                    <div class="search-empty" th:if="${#lists.isEmpty(links)}">
+                        Для этого явления связанные объекты пока не указаны.
+                    </div>
+                </section>
+            </section>
+
+            <aside class="info-panel">
+                <article class="info-card">
+                    <p class="strip-title">ID явления</p>
+                    <p th:text="${event.id}">1</p>
+                </article>
+                <article class="info-card">
+                    <p class="strip-title">Участников</p>
+                    <p th:text="${#lists.size(links)}">0</p>
+                </article>
+            </aside>
+        </div>
+    </section>
+</main>
+</body>
+</html>

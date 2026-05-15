@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск явлений | Astrolib</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-shell">
+    <section class="search-shell">
+        <div class="form-page-head">
+            <a class="back-link" th:href="@{/}"><span aria-hidden="true">&lt;</span> На главную</a>
+            <p class="eyebrow">Поиск явлений</p>
+            <h1 class="search-title">Найдите явления по типу, времени и связанным объектам</h1>
+            <p class="search-subtitle">Можно искать по типу явления, периодичности, диапазону дат и связанному объекту из каталога.</p>
+        </div>
+
+        <form class="search-form-panel" th:action="@{/search/events}" th:object="${filterForm}" method="get">
+            <section class="form-section">
+                <div class="section-caption">
+                    <h2>Фильтры</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field">
+                        <span>Тип явления</span>
+                        <select th:field="*{eventType}">
+                            <option value="">Любой</option>
+                            <option value="Затмение">Затмение</option>
+                            <option value="Соединение">Соединение</option>
+                            <option value="Противостояние">Противостояние</option>
+                            <option value="Столкновение">Столкновение</option>
+                            <option value="Прохождение апоцентра">Прохождение апоцентра</option>
+                            <option value="Прохождение перицентра">Прохождение перицентра</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Периодичность</span>
+                        <select th:field="*{periodicity}">
+                            <option value="">Любая</option>
+                            <option value="Короткопериодическое">Короткопериодическое</option>
+                            <option value="Долгопериодическое">Долгопериодическое</option>
+                            <option value="Уникальное">Уникальное</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Дата начала не раньше</span>
+                        <input type="date" th:field="*{startDate}">
+                    </label>
+                    <label class="field">
+                        <span>Дата окончания не позже</span>
+                        <input type="date" th:field="*{endDate}">
+                    </label>
+                    <label class="field field-wide">
+                        <span>Связанный объект</span>
+                        <input type="text" th:field="*{linkedObjectName}" placeholder="Например, Earth, Halley, Sun">
+                    </label>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button class="button-submit" type="submit">Применить фильтры</button>
+            </div>
+        </form>
+
+        <div class="search-empty" th:if="${!hasFilters}">
+            Выберите хотя бы один фильтр для поиска явлений.
+        </div>
+
+        <section class="result-panel" th:if="${hasFilters}">
+            <div class="result-panel-head">
+                <h2>Результаты поиска</h2>
+                <p th:text="'Найдено: ' + ${#lists.size(eventResults)}">Найдено: 0</p>
+            </div>
+            <div class="result-list" th:if="${!#lists.isEmpty(eventResults)}">
+                <a class="result-card result-card-link" th:each="item : ${eventResults}" th:href="@{/events/{id}(id=${item.id})}">
+                    <div class="result-card-head">
+                        <h3 th:text="${item.name}">Event</h3>
+                        <span class="result-badge" th:text="${item.type}">TYPE</span>
+                    </div>
+                    <p class="result-meta" th:text="${'Периодичность: ' + (item.catalog_id != null ? item.catalog_id : 'нет данных')}">Периодичность</p>
+                    <p class="result-meta" th:text="${'Начало: ' + (item.start_date != null ? item.start_date : 'нет данных')}">Начало</p>
+                    <p class="result-meta" th:text="${'Окончание: ' + (item.end_date != null ? item.end_date : 'нет данных')}">Окончание</p>
+                    <p class="result-notes" th:text="${item.notes != null ? item.notes : 'Комментарий отсутствует'}">Комментарий</p>
+                </a>
+            </div>
+            <div class="search-empty" th:if="${#lists.isEmpty(eventResults)}">
+                По этим фильтрам явления не найдены.
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

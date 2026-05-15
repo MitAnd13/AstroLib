@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${object.name + ' | Astrolib'}">Object | Astrolib</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-shell">
+    <section class="form-page">
+        <div class="form-page-head">
+            <a class="back-link" th:href="@{/search/name}"><span aria-hidden="true">&lt;</span> К поиску</a>
+            <p class="eyebrow">Карточка объекта</p>
+            <h1 class="form-page-title" th:text="${object.name}">Sun</h1>
+            <p class="form-page-copy" th:text="${object.notes != null ? object.notes : 'Комментарий отсутствует'}">Описание объекта</p>
+        </div>
+
+        <div class="discovery-layout">
+            <section class="form-panel">
+                <section class="form-section">
+                    <div class="section-caption">
+                        <h2>Общие сведения</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="field"><span>Тип</span><input type="text" th:value="${object.type}" readonly></div>
+                        <div class="field"><span>Каталог</span><input type="text" th:value="${object.catalog_id}" readonly></div>
+                        <div class="field"><span>Дата открытия</span><input type="text" th:value="${object.found_date}" readonly></div>
+                        <div class="field"><span>Первооткрыватель</span><input type="text" th:value="${object.found_name}" readonly></div>
+                        <div class="field field-wide"><span>Масса (в кг)</span><input type="text" th:value="${object.mass}" readonly></div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="section-caption">
+                        <h2>Параметры типа</h2>
+                    </div>
+                    <div class="form-grid" th:switch="${object.type.name()}">
+                        <th:block th:case="'STAR'">
+                            <div class="field"><span>Спектральный класс</span><input type="text" th:value="${object.star_spectre}" readonly></div>
+                            <div class="field"><span>Класс светимости</span><input type="text" th:value="${object.star_light}" readonly></div>
+                            <div class="field field-wide"><span>Количество компонентов</span><input type="text" th:value="${object.star_count}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'NEBULA'">
+                            <div class="field field-wide"><span>Тип туманности</span><input type="text" th:value="${object.nebula_type}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'GALAXY'">
+                            <div class="field field-wide"><span>Тип галактики</span><input type="text" th:value="${object.galaxy_type}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'PLANET'">
+                            <div class="field"><span>Тип планеты</span><input type="text" th:value="${object.planet_type}" readonly></div>
+                            <div class="field"><span>Родительская звезда</span><input type="text" th:value="${object.planet_parent_star != null ? object.planet_parent_star.name : ''}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'SATELLITE'">
+                            <div class="field"><span>Тип спутника</span><input type="text" th:value="${object.satellite_type}" readonly></div>
+                            <div class="field"><span>Родительская планета</span><input type="text" th:value="${object.satellite_parent_planet != null ? object.satellite_parent_planet.name : ''}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'ASTEROID'">
+                            <div class="field"><span>Спектральный класс</span><input type="text" th:value="${object.asteroid_spectre}" readonly></div>
+                            <div class="field"><span>Группа</span><input type="text" th:value="${object.asteroid_group}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'COMET'">
+                            <div class="field"><span>Тип кометы</span><input type="text" th:value="${object.comet_type}" readonly></div>
+                            <div class="field"><span>Класс кометы</span><input type="text" th:value="${object.comet_class}" readonly></div>
+                        </th:block>
+                        <th:block th:case="'METEOR_SHOWER'">
+                            <div class="field"><span>Интенсивность</span><input type="text" th:value="${object.meteor_shower_intensity}" readonly></div>
+                            <div class="field"><span>Комета-прародитель</span><input type="text" th:value="${object.meteor_shower_parent != null ? object.meteor_shower_parent.name : ''}" readonly></div>
+                        </th:block>
+                    </div>
+                </section>
+
+                <section class="form-section" th:if="${isStaticType && staticCharacteristics != null}">
+                    <div class="section-caption">
+                        <h2>Статические характеристики</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="field"><span>Прямое восхождение</span><input type="text" th:value="${staticCharacteristics.right_ascension}" readonly></div>
+                        <div class="field"><span>Склонение</span><input type="text" th:value="${staticCharacteristics.declension}" readonly></div>
+                        <div class="field"><span>Расстояние до Солнца</span><input type="text" th:value="${staticCharacteristics.sun_distance}" readonly></div>
+                        <div class="field"><span>Созвездие</span><input type="text" th:value="${staticCharacteristics.constellation}" readonly></div>
+                    </div>
+                </section>
+
+                <section class="form-section" th:if="${!isStaticType && movingCharacteristics != null}">
+                    <div class="section-caption">
+                        <h2>Динамические характеристики</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="field"><span>Большая полуось</span><input type="text" th:value="${movingCharacteristics.semiaxis}" readonly></div>
+                        <div class="field"><span>Эксцентриситет</span><input type="text" th:value="${movingCharacteristics.eccentricity}" readonly></div>
+                        <div class="field"><span>Наклонение</span><input type="text" th:value="${movingCharacteristics.inclination}" readonly></div>
+                        <div class="field"><span>Долгота восходящего угла</span><input type="text" th:value="${movingCharacteristics.longitude_of_asc_angle}" readonly></div>
+                        <div class="field"><span>Минимальная скорость</span><input type="text" th:value="${movingCharacteristics.min_velocity}" readonly></div>
+                        <div class="field"><span>Максимальная скорость</span><input type="text" th:value="${movingCharacteristics.max_velocity}" readonly></div>
+                        <div class="field"><span>Минимальная светимость</span><input type="text" th:value="${movingCharacteristics.min_light}" readonly></div>
+                        <div class="field"><span>Максимальная светимость</span><input type="text" th:value="${movingCharacteristics.max_light}" readonly></div>
+                    </div>
+                </section>
+            </section>
+
+            <aside class="info-panel">
+                <article class="info-card">
+                    <p class="strip-title">ID объекта</p>
+                    <p th:text="${object.id}">1</p>
+                </article>
+                <article class="info-card" th:if="${isStaticType && staticCharacteristics == null}">
+                    <p class="strip-title">Характеристики</p>
+                    <p>Для этого объекта статические характеристики пока не заполнены.</p>
+                </article>
+                <article class="info-card" th:if="${!isStaticType && movingCharacteristics == null}">
+                    <p class="strip-title">Характеристики</p>
+                    <p>Для этого объекта динамические характеристики пока не заполнены.</p>
+                </article>
+            </aside>
+        </div>
+    </section>
+</main>
+</body>
+</html>

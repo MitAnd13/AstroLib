@@ -37,7 +37,7 @@
                     <p th:text="'Найдено: ' + ${#lists.size(objectResults)}">Найдено: 0</p>
                 </div>
                 <div class="result-list" th:if="${!#lists.isEmpty(objectResults)}">
-                    <article class="result-card" th:each="item : ${objectResults}">
+                    <a class="result-card result-card-link" th:each="item : ${objectResults}" th:href="@{/objects/{id}(id=${item.id})}">
                         <div class="result-card-head">
                             <h3 th:text="${item.name}">Sun</h3>
                             <span class="result-badge" th:text="${item.type}">STAR</span>
@@ -45,7 +45,7 @@
                         <p class="result-meta" th:text="${'Каталог: ' + (item.catalog_id != null ? item.catalog_id : 'нет данных')}">Каталог</p>
                         <p class="result-meta" th:text="${'Первооткрыватель: ' + (item.found_name != null ? item.found_name : 'нет данных')}">Первооткрыватель</p>
                         <p class="result-notes" th:text="${item.notes != null ? item.notes : 'Комментарий отсутствует'}">Комментарий</p>
-                    </article>
+                    </a>
                 </div>
                 <div class="search-empty" th:if="${#lists.isEmpty(objectResults)}">
                     Объекты по этому запросу не найдены.
@@ -58,7 +58,7 @@
                     <p th:text="'Найдено: ' + ${#lists.size(eventResults)}">Найдено: 0</p>
                 </div>
                 <div class="result-list" th:if="${!#lists.isEmpty(eventResults)}">
-                    <article class="result-card" th:each="item : ${eventResults}">
+                    <a class="result-card result-card-link" th:each="item : ${eventResults}" th:href="@{/events/{id}(id=${item.id})}">
                         <div class="result-card-head">
                             <h3 th:text="${item.name}">Solar eclipse</h3>
                             <span class="result-badge" th:text="${item.type}">ECLIPSE</span>
@@ -66,7 +66,7 @@
                         <p class="result-meta" th:text="${'Начало: ' + (item.start_date != null ? item.start_date : 'нет данных')}">Начало</p>
                         <p class="result-meta" th:text="${'Окончание: ' + (item.end_date != null ? item.end_date : 'нет данных')}">Окончание</p>
                         <p class="result-notes" th:text="${item.notes != null ? item.notes : 'Комментарий отсутствует'}">Комментарий</p>
-                    </article>
+                    </a>
                 </div>
                 <div class="search-empty" th:if="${#lists.isEmpty(eventResults)}">
                     Явления по этому запросу не найдены.

@@ -9,6 +9,7 @@ import ru.msu.cmc.cipher.astrolib.models.AstroObjects;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 @Repository
 @Transactional
@@ -62,12 +63,13 @@ public class AstroObjectDAOImplementation extends CommonDAOImplementation<AstroO
 
     @Override
     public AstroObjects getByName(String name) {
+        String normalizedName = normalizeLower(name);
         try {
             return entityManager.createQuery(
-                "FROM AstroObjects o WHERE lower(o.name) = lower(:name)",
+                "FROM AstroObjects o WHERE lower(o.name) = :name",
                 AstroObjects.class
             )
-                .setParameter("name", name)
+                .setParameter("name", normalizedName)
                 .getSingleResult();
         } catch (NoResultException exception) {
             return null;
@@ -76,21 +78,23 @@ public class AstroObjectDAOImplementation extends CommonDAOImplementation<AstroO
 
     @Override
     public boolean existsByName(String name) {
+        String normalizedName = normalizeLower(name);
         TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(o) FROM AstroObjects o WHERE lower(o.name) = lower(:name)",
+            "SELECT COUNT(o) FROM AstroObjects o WHERE lower(o.name) = :name",
             Long.class
         );
-        query.setParameter("name", name);
+        query.setParameter("name", normalizedName);
         return query.getSingleResult() > 0;
     }
 
     @Override
     public Collection<AstroObjects> getByNameLike(String namePart) {
+        String normalizedNamePart = "%" + normalizeLower(namePart) + "%";
         return entityManager.createQuery(
-            "FROM AstroObjects o WHERE lower(o.name) LIKE lower(:namePart) ORDER BY o.name",
+            "FROM AstroObjects o WHERE lower(o.name) LIKE :namePart ORDER BY o.name",
             AstroObjects.class
         )
-            .setParameter("namePart", "%" + namePart + "%")
+            .setParameter("namePart", normalizedNamePart)
             .getResultList();
     }
 
@@ -106,128 +110,142 @@ public class AstroObjectDAOImplementation extends CommonDAOImplementation<AstroO
 
     @Override
     public Collection<AstroObjects> getStarsByFilters(Character spectre, String light, Integer starCount) {
+        String normalizedLight = normalizeLower(light);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
             "AND (:spectre IS NULL OR o.star_spectre = :spectre) " +
-            "AND (:light IS NULL OR lower(o.star_light) = lower(:light)) " +
+            "AND (:light IS NULL OR lower(o.star_light) = :light) " +
             "AND (:starCount IS NULL OR o.star_count = :starCount) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.STAR)
             .setParameter("spectre", spectre)
-            .setParameter("light", light)
+            .setParameter("light", normalizedLight)
             .setParameter("starCount", starCount)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getNebulaeByFilters(String nebulaType) {
+        String normalizedNebulaType = normalizeLower(nebulaType);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:nebulaType IS NULL OR lower(o.nebula_type) = lower(:nebulaType)) " +
+            "AND (:nebulaType IS NULL OR lower(o.nebula_type) = :nebulaType) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.NEBULA)
-            .setParameter("nebulaType", nebulaType)
+            .setParameter("nebulaType", normalizedNebulaType)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getGalaxiesByFilters(String galaxyType) {
+        String normalizedGalaxyType = normalizeLower(galaxyType);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:galaxyType IS NULL OR lower(o.galaxy_type) = lower(:galaxyType)) " +
+            "AND (:galaxyType IS NULL OR lower(o.galaxy_type) = :galaxyType) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.GALAXY)
-            .setParameter("galaxyType", galaxyType)
+            .setParameter("galaxyType", normalizedGalaxyType)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getPlanetsByFilters(String planetType, Long parentStarId) {
+        String normalizedPlanetType = normalizeLower(planetType);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:planetType IS NULL OR lower(o.planet_type) = lower(:planetType)) " +
+            "AND (:planetType IS NULL OR lower(o.planet_type) = :planetType) " +
             "AND (:parentStarId IS NULL OR o.planet_parent_star.id = :parentStarId) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.PLANET)
-            .setParameter("planetType", planetType)
+            .setParameter("planetType", normalizedPlanetType)
             .setParameter("parentStarId", parentStarId)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getSatellitesByFilters(String satelliteType, Long parentPlanetId) {
+        String normalizedSatelliteType = normalizeLower(satelliteType);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:satelliteType IS NULL OR lower(o.satellite_type) = lower(:satelliteType)) " +
+            "AND (:satelliteType IS NULL OR lower(o.satellite_type) = :satelliteType) " +
             "AND (:parentPlanetId IS NULL OR o.satellite_parent_planet.id = :parentPlanetId) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.SATELLITE)
-            .setParameter("satelliteType", satelliteType)
+            .setParameter("satelliteType", normalizedSatelliteType)
             .setParameter("parentPlanetId", parentPlanetId)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getAsteroidsByFilters(String asteroidSpectre, String asteroidGroup) {
+        String normalizedAsteroidSpectre = normalizeLower(asteroidSpectre);
+        String normalizedAsteroidGroup = normalizeLower(asteroidGroup);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:asteroidSpectre IS NULL OR lower(o.asteroid_spectre) = lower(:asteroidSpectre)) " +
-            "AND (:asteroidGroup IS NULL OR lower(o.asteroid_group) = lower(:asteroidGroup)) " +
+            "AND (:asteroidSpectre IS NULL OR lower(o.asteroid_spectre) = :asteroidSpectre) " +
+            "AND (:asteroidGroup IS NULL OR lower(o.asteroid_group) = :asteroidGroup) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.ASTEROID)
-            .setParameter("asteroidSpectre", asteroidSpectre)
-            .setParameter("asteroidGroup", asteroidGroup)
+            .setParameter("asteroidSpectre", normalizedAsteroidSpectre)
+            .setParameter("asteroidGroup", normalizedAsteroidGroup)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getCometsByFilters(String cometType, String cometClass) {
+        String normalizedCometType = normalizeLower(cometType);
+        String normalizedCometClass = normalizeLower(cometClass);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:cometType IS NULL OR lower(o.comet_type) = lower(:cometType)) " +
-            "AND (:cometClass IS NULL OR lower(o.comet_class) = lower(:cometClass)) " +
+            "AND (:cometType IS NULL OR lower(o.comet_type) = :cometType) " +
+            "AND (:cometClass IS NULL OR lower(o.comet_class) = :cometClass) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.COMET)
-            .setParameter("cometType", cometType)
-            .setParameter("cometClass", cometClass)
+            .setParameter("cometType", normalizedCometType)
+            .setParameter("cometClass", normalizedCometClass)
             .getResultList();
     }
 
     @Override
     public Collection<AstroObjects> getMeteorShowersByFilters(String intensity, Long parentCometId) {
+        String normalizedIntensity = normalizeLower(intensity);
         return entityManager.createQuery(
             "FROM AstroObjects o " +
             "WHERE o.type = :type " +
-            "AND (:intensity IS NULL OR lower(o.meteor_shower_intensity) = lower(:intensity)) " +
+            "AND (:intensity IS NULL OR lower(o.meteor_shower_intensity) = :intensity) " +
             "AND (:parentCometId IS NULL OR o.meteor_shower_parent.id = :parentCometId) " +
             "ORDER BY o.name",
             AstroObjects.class
         )
             .setParameter("type", AstroObjects.ObjType.METEOR_SHOWER)
-            .setParameter("intensity", intensity)
+            .setParameter("intensity", normalizedIntensity)
             .setParameter("parentCometId", parentCometId)
             .getResultList();
+    }
+
+    private String normalizeLower(String value) {
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 
     private void prepareTypedObject(AstroObjects object) {

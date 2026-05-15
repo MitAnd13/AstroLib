@@ -17,12 +17,12 @@ public class ObjectsToEvents implements CommonEntity<Long>{
     @Column(nullable = false, name = "o2e_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "o2e_object_id")
     @NonNull
     private AstroObjects object;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "o2e_event_id")
     @NonNull
     private Events event;

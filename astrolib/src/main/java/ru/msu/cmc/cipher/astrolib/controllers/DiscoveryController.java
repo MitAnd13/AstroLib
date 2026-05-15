@@ -29,8 +29,11 @@ public class DiscoveryController {
         model.addAttribute("discoveryForm", discoveryForm);
 
         try {
-            discoveryService.createObject(discoveryForm);
-            model.addAttribute("successMessage", "Объект успешно добавлен в базу данных");
+            discoveryService.createDiscovery(discoveryForm);
+            String successMessage = "event".equals(discoveryForm.getDiscoveryKind())
+                ? "Явление успешно добавлено в базу данных"
+                : "Объект успешно добавлен в базу данных";
+            model.addAttribute("successMessage", successMessage);
             model.addAttribute("discoveryForm", new DiscoveryForm());
         } catch (IllegalArgumentException exception) {
             model.addAttribute("errorMessage", exception.getMessage());
@@ -44,7 +47,9 @@ public class DiscoveryController {
             if (message == null || message.isBlank()) {
                 message = exception.getClass().getSimpleName();
             }
-            model.addAttribute("errorMessage", "Не удалось сохранить объект: " + message);
+
+            String entityName = "event".equals(discoveryForm.getDiscoveryKind()) ? "явление" : "объект";
+            model.addAttribute("errorMessage", "Не удалось сохранить " + entityName + ": " + message);
         }
 
         return "discoveries/new";

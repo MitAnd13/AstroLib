@@ -3,34 +3,55 @@ package ru.msu.cmc.cipher.astrolib.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.msu.cmc.cipher.astrolib.dao.AstroObjectDAO;
+import ru.msu.cmc.cipher.astrolib.dao.EventDAO;
 import ru.msu.cmc.cipher.astrolib.dao.MovingCharacteristicsDAO;
 import ru.msu.cmc.cipher.astrolib.dao.StaticCharacteristicsDAO;
 import ru.msu.cmc.cipher.astrolib.forms.DiscoveryForm;
 import ru.msu.cmc.cipher.astrolib.models.AstroObjects;
+import ru.msu.cmc.cipher.astrolib.models.Events;
 import ru.msu.cmc.cipher.astrolib.models.MovingCharacteristics;
+import ru.msu.cmc.cipher.astrolib.models.ObjectsToEvents;
 import ru.msu.cmc.cipher.astrolib.models.StaticCharacteristics;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Service
 public class DiscoveryService {
     private final AstroObjectDAO astroObjectDAO;
+    private final EventDAO eventDAO;
     private final StaticCharacteristicsDAO staticCharacteristicsDAO;
     private final MovingCharacteristicsDAO movingCharacteristicsDAO;
 
     public DiscoveryService(
         AstroObjectDAO astroObjectDAO,
+        EventDAO eventDAO,
         StaticCharacteristicsDAO staticCharacteristicsDAO,
         MovingCharacteristicsDAO movingCharacteristicsDAO
     ) {
         this.astroObjectDAO = astroObjectDAO;
+        this.eventDAO = eventDAO;
         this.staticCharacteristicsDAO = staticCharacteristicsDAO;
         this.movingCharacteristicsDAO = movingCharacteristicsDAO;
     }
 
     @Transactional
-    public void createObject(DiscoveryForm form) {
+    public void createDiscovery(DiscoveryForm form) {
+        if (form == null) {
+            throw new IllegalArgumentException("Форма не передана");
+        }
+
+        if ("event".equals(form.getDiscoveryKind())) {
+            createEvent(form);
+            return;
+        }
+
+        createObject(form);
+    }
+
+    private void createObject(DiscoveryForm form) {
         validateObjectForm(form);
 
         AstroObjects object = new AstroObjects();
@@ -54,14 +75,22 @@ public class DiscoveryService {
         }
     }
 
-    private void validateObjectForm(DiscoveryForm form) {
-        if (form == null) {
-            throw new IllegalArgumentException("Форма не передана");
-        }
-        if (!"object".equals(form.getDiscoveryKind())) {
-            throw new IllegalArgumentException("Пока поддерживается только добавление объекта");
-        }
+    private void createEvent(DiscoveryForm form) {
+        validateEventForm(form);
 
+        Events event = new Events();
+        event.setName(form.getName().trim());
+        event.setType(normalize(form.getEventType()));
+        event.setCatalog_id(normalize(form.getPeriodicity()));
+        event.setStart_date(form.getEventStart());
+        event.setEnd_date(form.getEventEnd());
+        event.setNotes(normalize(form.getNotes()));
+
+        eventDAO.insert(event, buildEventLinks(form, event));
+    }
+
+    private void validateObjectForm(DiscoveryForm form) {
+        require("object".equals(form.getDiscoveryKind()), "Некорректный тип заявки на объект");
         require(!isBlank(form.getName()), "Укажите название объекта");
         require(!isBlank(form.getCatalogId()), "Укажите идентификатор каталога");
         require(form.getFoundDate() != null, "Укажите дату открытия");
@@ -94,6 +123,42 @@ public class DiscoveryService {
         require(form.getMaxVelocity() != null, "Укажите максимальную скорость");
         require(form.getMinLight() != null, "Укажите минимальную светимость");
         require(form.getMaxLight() != null, "Укажите максимальную светимость");
+    }
+
+    private void validateEventForm(DiscoveryForm form) {
+        require("event".equals(form.getDiscoveryKind()), "Некорректный тип заявки на явление");
+        require(!isBlank(form.getName()), "Укажите название явления");
+        require(!isBlank(form.getEventType()), "Укажите тип явления");
+        require(!isBlank(form.getPeriodicity()), "Укажите периодичность");
+        require(form.getEventStart() != null, "Укажите дату начала явления");
+        require(form.getEventEnd() != null, "Укажите дату окончания явления");
+        require(!form.getEventEnd().isBefore(form.getEventStart()), "Дата окончания не может быть раньше даты начала");
+        require(!isBlank(form.getNotes()), "Укажите комментарий к заявке");
+
+        if (eventDAO.existsByName(form.getName().trim())) {
+            throw new IllegalArgumentException("Явление с таким названием уже существует");
+        }
+
+        List<String> names = safeList(form.getLinkedObjectNames());
+        List<String> roles = safeList(form.getLinkedObjectRoles());
+        require(names.size() == roles.size(), "Некорректные связанные объекты");
+
+        boolean hasAnyLink = false;
+        for (int index = 0; index < names.size(); index++) {
+            String linkedName = normalize(names.get(index));
+            String role = normalize(roles.get(index));
+            if (linkedName == null && role == null) {
+                continue;
+            }
+
+            hasAnyLink = true;
+            require(linkedName != null, "Укажите название связанного объекта");
+            require(role != null, "Укажите роль связанного объекта");
+            AstroObjects object = astroObjectDAO.getByName(linkedName);
+            require(object != null, "Связанный объект не найден: " + linkedName);
+        }
+
+        require(hasAnyLink, "Добавьте хотя бы один связанный объект");
     }
 
     private void validateTypeSpecificFields(DiscoveryForm form, AstroObjects.ObjType type) {
@@ -193,6 +258,29 @@ public class DiscoveryService {
         return characteristics;
     }
 
+    private List<ObjectsToEvents> buildEventLinks(DiscoveryForm form, Events event) {
+        List<ObjectsToEvents> links = new ArrayList<>();
+        List<String> names = safeList(form.getLinkedObjectNames());
+        List<String> roles = safeList(form.getLinkedObjectRoles());
+
+        for (int index = 0; index < names.size(); index++) {
+            String linkedName = normalize(names.get(index));
+            String role = normalize(roles.get(index));
+            if (linkedName == null && role == null) {
+                continue;
+            }
+
+            AstroObjects object = astroObjectDAO.getByName(linkedName);
+            ObjectsToEvents link = new ObjectsToEvents();
+            link.setObject(object);
+            link.setEvent(event);
+            link.setRole(role);
+            links.add(link);
+        }
+
+        return links;
+    }
+
     private AstroObjects.ObjType parseObjectType(String objectKind) {
         try {
             return AstroObjects.ObjType.valueOf(objectKind.trim().toUpperCase(Locale.ROOT));
@@ -250,5 +338,9 @@ public class DiscoveryService {
     private String normalizeMassMantissa(String value) {
         String normalized = normalize(value);
         return normalized == null ? null : normalized.replace(',', '.');
+    }
+
+    private List<String> safeList(List<String> values) {
+        return values == null ? List.of() : values;
     }
 }

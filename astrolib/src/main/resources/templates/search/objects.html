@@ -13,7 +13,7 @@
             <a class="back-link" th:href="@{/}"><span aria-hidden="true">&lt;</span> На главную</a>
             <p class="eyebrow">Поиск объектов</p>
             <h1 class="search-title">Отберите объекты по типу и характеристикам</h1>
-            <p class="search-subtitle">Сначала выберите тип объекта, затем заполняйте только нужные фильтры. Пустые поля в поиске игнорируются.</p>
+            <p class="search-subtitle">Сначала выберите тип объекта. После этого форма покажет только те группы фильтров, которые имеют смысл для выбранного класса.</p>
         </div>
 
         <form class="search-form-panel" th:action="@{/search/objects}" th:object="${filterForm}" method="get">
@@ -24,7 +24,7 @@
                 <div class="form-grid">
                     <label class="field">
                         <span>Тип объекта</span>
-                        <select th:field="*{objectKind}">
+                        <select th:field="*{objectKind}" data-search-object-kind>
                             <option value="">Выберите тип</option>
                             <option value="star">Звезда</option>
                             <option value="nebula">Туманность</option>
@@ -39,30 +39,205 @@
                 </div>
             </section>
 
-            <section class="form-section">
+            <section class="form-section is-hidden" data-object-kind="star">
                 <div class="section-caption">
-                    <h2>Типоспецифичные фильтры</h2>
+                    <h2>Параметры звезды</h2>
                 </div>
                 <div class="form-grid">
-                    <label class="field"><span>Класс звезды</span><input type="text" th:field="*{starSpectre}" placeholder="O, B, A, F..."></label>
-                    <label class="field"><span>Светимость звезды</span><input type="text" th:field="*{starLight}" placeholder="Ia, III, V"></label>
-                    <label class="field"><span>Компоненты звезды</span><input type="number" th:field="*{starCount}" placeholder="1"></label>
-                    <label class="field"><span>Тип туманности</span><input type="text" th:field="*{nebulaType}" placeholder="Эмиссионная"></label>
-                    <label class="field"><span>Тип галактики</span><input type="text" th:field="*{galaxyType}" placeholder="Спиральная"></label>
-                    <label class="field"><span>Тип планеты</span><input type="text" th:field="*{planetType}" placeholder="Суперземля"></label>
-                    <label class="field"><span>Родительская звезда</span><input type="text" th:field="*{planetParentStar}" placeholder="Sun"></label>
-                    <label class="field"><span>Тип спутника</span><input type="text" th:field="*{satelliteType}" placeholder="Регулярный"></label>
-                    <label class="field"><span>Родительская планета</span><input type="text" th:field="*{satelliteParentPlanet}" placeholder="Earth"></label>
-                    <label class="field"><span>Класс астероида</span><input type="text" th:field="*{asteroidSpectre}" placeholder="C, S, M"></label>
-                    <label class="field"><span>Группа астероида</span><input type="text" th:field="*{asteroidGroup}" placeholder="Главный пояс"></label>
-                    <label class="field"><span>Тип кометы</span><input type="text" th:field="*{cometType}" placeholder="Короткопериодическая"></label>
-                    <label class="field"><span>Класс кометы</span><input type="text" th:field="*{cometClass}" placeholder="Семейство Юпитера"></label>
-                    <label class="field"><span>Интенсивность потока</span><input type="text" th:field="*{meteorIntensity}" placeholder="Сильная"></label>
-                    <label class="field"><span>Комета-прародитель</span><input type="text" th:field="*{meteorParentComet}" placeholder="Halley"></label>
+                    <label class="field">
+                        <span>Спектральный класс</span>
+                        <select th:field="*{starSpectre}">
+                            <option value="">Любой</option>
+                            <option value="O">O</option>
+                            <option value="B">B</option>
+                            <option value="A">A</option>
+                            <option value="F">F</option>
+                            <option value="G">G</option>
+                            <option value="K">K</option>
+                            <option value="M">M</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Класс светимости</span>
+                        <select th:field="*{starLight}">
+                            <option value="">Любой</option>
+                            <option value="0">0</option>
+                            <option value="Ia">Ia</option>
+                            <option value="Ib">Ib</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                            <option value="V">V</option>
+                            <option value="VI">VI</option>
+                            <option value="VII">VII</option>
+                        </select>
+                    </label>
+                    <label class="field field-wide"><span>Количество компонентов</span><input type="number" th:field="*{starCount}" min="1" placeholder="1"></label>
                 </div>
             </section>
 
-            <section class="form-section">
+            <section class="form-section is-hidden" data-object-kind="nebula">
+                <div class="section-caption">
+                    <h2>Параметры туманности</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide">
+                        <span>Тип туманности</span>
+                        <select th:field="*{nebulaType}">
+                            <option value="">Любой</option>
+                            <option value="Темная">Темная</option>
+                            <option value="Эмиссионная">Эмиссионная</option>
+                            <option value="Отражательная">Отражательная</option>
+                            <option value="Планетарная">Планетарная</option>
+                            <option value="Остаток сверхновых и новых звезд">Остаток сверхновых и новых звезд</option>
+                            <option value="Вокруг звезд Вольфа - Райе">Вокруг звезд Вольфа - Райе</option>
+                            <option value="Вокруг O-звезд">Вокруг O-звезд</option>
+                            <option value="В областях звездообразования">В областях звездообразования</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="galaxy">
+                <div class="section-caption">
+                    <h2>Параметры галактики</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide">
+                        <span>Тип галактики</span>
+                        <select th:field="*{galaxyType}">
+                            <option value="">Любой</option>
+                            <option value="Эллиптическая">Эллиптическая</option>
+                            <option value="Спиральная">Спиральная</option>
+                            <option value="Линзовидная">Линзовидная</option>
+                            <option value="Неправильная">Неправильная</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="planet">
+                <div class="section-caption">
+                    <h2>Параметры планеты</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide">
+                        <span>Тип планеты</span>
+                        <select th:field="*{planetType}">
+                            <option value="">Любой</option>
+                            <option value="Хтоническая">Хтоническая</option>
+                            <option value="Углеродная">Углеродная</option>
+                            <option value="Без ядра">Без ядра</option>
+                            <option value="Пустынная">Пустынная</option>
+                            <option value="Газовый карлик">Газовый карлик</option>
+                            <option value="Газовый гигант">Газовый гигант</option>
+                            <option value="Гелиевая">Гелиевая</option>
+                            <option value="Ледяной гигант">Ледяной гигант</option>
+                            <option value="Ледяная">Ледяная</option>
+                            <option value="Железная">Железная</option>
+                            <option value="Лавовая">Лавовая</option>
+                            <option value="Планета-океан">Планета-океан</option>
+                            <option value="Протопланета">Протопланета</option>
+                            <option value="Пухлая">Пухлая</option>
+                            <option value="Планета сажи">Планета сажи</option>
+                            <option value="Планета пара">Планета пара</option>
+                            <option value="Суперземля">Суперземля</option>
+                            <option value="Силикатная">Силикатная</option>
+                            <option value="Земной группы">Земной группы</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="satellite">
+                <div class="section-caption">
+                    <h2>Параметры спутника</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide">
+                        <span>Тип спутника</span>
+                        <select th:field="*{satelliteType}">
+                            <option value="">Любой</option>
+                            <option value="Регулярный">Регулярный</option>
+                            <option value="Нерегулярный">Нерегулярный</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="asteroid">
+                <div class="section-caption">
+                    <h2>Параметры астероида</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field"><span>Спектральный класс</span><input type="text" th:field="*{asteroidSpectre}" placeholder="C, S, M"></label>
+                    <label class="field"><span>Группа</span><input type="text" th:field="*{asteroidGroup}" placeholder="Главный пояс"></label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="comet">
+                <div class="section-caption">
+                    <h2>Параметры кометы</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field">
+                        <span>Тип кометы</span>
+                        <select th:field="*{cometType}">
+                            <option value="">Любой</option>
+                            <option value="Короткопериодическая">Короткопериодическая</option>
+                            <option value="Долгопериодическая">Долгопериодическая</option>
+                            <option value="Однопроходная">Однопроходная</option>
+                        </select>
+                    </label>
+                    <label class="field"><span>Класс кометы</span><input type="text" th:field="*{cometClass}" placeholder="Семейство Юпитера"></label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-kind="meteor_shower">
+                <div class="section-caption">
+                    <h2>Параметры метеорного потока</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide">
+                        <span>Интенсивность</span>
+                        <select th:field="*{meteorIntensity}">
+                            <option value="">Любая</option>
+                            <option value="Сильная">Сильная</option>
+                            <option value="Средняя">Средняя</option>
+                            <option value="Слабая">Слабая</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-parent-for="planet">
+                <div class="section-caption">
+                    <h2>Родительская звезда</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide"><span>Название звезды</span><input type="text" th:field="*{planetParentStar}" placeholder="Sun"></label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-parent-for="satellite">
+                <div class="section-caption">
+                    <h2>Родительская планета</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide"><span>Название планеты</span><input type="text" th:field="*{satelliteParentPlanet}" placeholder="Earth"></label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-parent-for="meteor_shower">
+                <div class="section-caption">
+                    <h2>Комета-прародитель</h2>
+                </div>
+                <div class="form-grid">
+                    <label class="field field-wide"><span>Название кометы</span><input type="text" th:field="*{meteorParentComet}" placeholder="Halley"></label>
+                </div>
+            </section>
+
+            <section class="form-section is-hidden" data-object-group="static">
                 <div class="section-caption">
                     <h2>Фильтры неподвижных тел</h2>
                 </div>
@@ -73,11 +248,11 @@
                     <label class="field"><span>Склонение до</span><input type="number" step="any" th:field="*{maxDeclension}"></label>
                     <label class="field"><span>Расстояние от</span><input type="number" th:field="*{minSunDistance}"></label>
                     <label class="field"><span>Расстояние до</span><input type="number" th:field="*{maxSunDistance}"></label>
-                    <label class="field"><span>Созвездие</span><input type="text" th:field="*{constellation}" placeholder="Орион"></label>
+                    <label class="field field-wide"><span>Созвездие</span><input type="text" th:field="*{constellation}" placeholder="Орион"></label>
                 </div>
             </section>
 
-            <section class="form-section">
+            <section class="form-section is-hidden" data-object-group="moving">
                 <div class="section-caption">
                     <h2>Фильтры подвижных тел</h2>
                 </div>
@@ -112,7 +287,7 @@
                 <p th:text="'Найдено: ' + ${#lists.size(objectResults)}">Найдено: 0</p>
             </div>
             <div class="result-list" th:if="${!#lists.isEmpty(objectResults)}">
-                <article class="result-card" th:each="item : ${objectResults}">
+                <a class="result-card result-card-link" th:each="item : ${objectResults}" th:href="@{/objects/{id}(id=${item.id})}">
                     <div class="result-card-head">
                         <h3 th:text="${item.name}">Object</h3>
                         <span class="result-badge" th:text="${item.type}">TYPE</span>
@@ -122,7 +297,7 @@
                     <p class="result-meta" th:text="${'Первооткрыватель: ' + (item.found_name != null ? item.found_name : 'нет данных')}">Первооткрыватель</p>
                     <p class="result-meta" th:text="${'Масса: ' + (item.mass != null ? item.mass : 'нет данных')}">Масса</p>
                     <p class="result-notes" th:text="${item.notes != null ? item.notes : 'Комментарий отсутствует'}">Комментарий</p>
-                </article>
+                </a>
             </div>
             <div class="search-empty" th:if="${#lists.isEmpty(objectResults)}">
                 По этим фильтрам ничего не найдено.
@@ -130,5 +305,7 @@
         </section>
     </section>
 </main>
+
+<script th:src="@{/js/search-filters.js}"></script>
 </body>
 </html>

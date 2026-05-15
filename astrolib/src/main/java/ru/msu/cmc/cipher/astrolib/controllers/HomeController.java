@@ -31,7 +31,7 @@ public class HomeController {
                 "title", "Поиск явлений",
                 "description", "Найти астрономические явления по фильтрам вида, времени и других характеристик",
                 "icon", "/icons/Moon.svg",
-                "href", "#",
+                "href", "/search/events",
                 "accent", "violet"
             ),
             Map.of(

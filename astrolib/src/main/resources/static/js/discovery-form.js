@@ -9,25 +9,26 @@
     const linkedObjectList = document.querySelector("[data-linked-object-list]");
     const addLinkedObjectButton = document.querySelector("[data-add-linked-object]");
     const staticKinds = new Set(["star", "nebula", "galaxy"]);
+    let linkedObjectIndex = linkedObjectList ? linkedObjectList.querySelectorAll(".linked-object-row").length : 0;
 
     // Добавление объекта в явлении
-    const linkedObjectRowTemplate = () => `
+    const linkedObjectRowTemplate = (index) => `
         <div class="linked-object-row">
             <label class="field">
                 <span>Объект из базы</span>
-                <input type="text" name="linkedObjectName[]" placeholder="Введите название объекта из базы">
+                <input type="text" name="linkedObjectNames[${index}]" placeholder="Введите название объекта из базы">
             </label>
             <label class="field">
                 <span>Роль</span>
-                <select name="linkedObjectRole[]">
+                <select name="linkedObjectRoles[${index}]">
                     <option value="">Выберите роль</option>
-                    <option>Источник явления</option>
-                    <option>Наблюдаемый объект</option>
-                    <option>Закрывающий объект</option>
-                    <option>Закрываемый объект</option>
-                    <option>Участник столкновения</option>
-                    <option>Центральное тело</option>
-                    <option>Другое</option>
+                    <option value="Источник явления">Источник явления</option>
+                    <option value="Наблюдаемый объект">Наблюдаемый объект</option>
+                    <option value="Закрывающий объект">Закрывающий объект</option>
+                    <option value="Закрываемый объект">Закрываемый объект</option>
+                    <option value="Участник столкновения">Участник столкновения</option>
+                    <option value="Центральное тело">Центральное тело</option>
+                    <option value="Другое">Другое</option>
                 </select>
             </label>
             <button class="button-inline button-inline-danger" type="button" data-remove-linked-object>Удалить</button>
@@ -99,7 +100,8 @@
 
     if (linkedObjectList && addLinkedObjectButton) {
         addLinkedObjectButton.addEventListener("click", () => {
-            linkedObjectList.insertAdjacentHTML("beforeend", linkedObjectRowTemplate());
+            linkedObjectList.insertAdjacentHTML("beforeend", linkedObjectRowTemplate(linkedObjectIndex));
+            linkedObjectIndex += 1;
         });
 
         linkedObjectList.addEventListener("click", (event) => {

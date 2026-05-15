@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.msu.cmc.cipher.astrolib.forms.EventFilterForm;
 import ru.msu.cmc.cipher.astrolib.forms.NameSearchForm;
 import ru.msu.cmc.cipher.astrolib.forms.ObjectFilterForm;
 import ru.msu.cmc.cipher.astrolib.services.SearchService;
@@ -33,5 +34,19 @@ public class SearchController {
         model.addAttribute("hasType", hasType);
         model.addAttribute("objectResults", hasType ? searchService.searchObjectsByFilters(filterForm) : java.util.List.of());
         return "search/objects";
+    }
+
+    @GetMapping("/events")
+    public String searchEvents(@ModelAttribute("filterForm") EventFilterForm filterForm, Model model) {
+        boolean hasFilters =
+            (filterForm.getEventType() != null && !filterForm.getEventType().isBlank())
+                || (filterForm.getPeriodicity() != null && !filterForm.getPeriodicity().isBlank())
+                || (filterForm.getLinkedObjectName() != null && !filterForm.getLinkedObjectName().isBlank())
+                || filterForm.getStartDate() != null
+                || filterForm.getEndDate() != null;
+
+        model.addAttribute("hasFilters", hasFilters);
+        model.addAttribute("eventResults", hasFilters ? searchService.searchEventsByFilters(filterForm) : java.util.List.of());
+        return "search/events";
     }
 }

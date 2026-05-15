@@ -58,11 +58,11 @@
                                 <input type="text" th:field="*{discoverer}" placeholder="Имя наблюдателя или обсерватории">
                             </label>
                             <label class="field" data-discovery-section="object">
-                                <span>Мантисса массы</span>
+                                <span>Мантисса массы (в кг)</span>
                                 <input type="text" th:field="*{massMantissa}" placeholder="Например, 6,12345">
                             </label>
                             <label class="field" data-discovery-section="object">
-                                <span>Порядок массы</span>
+                                <span>Порядок массы (в кг)</span>
                                 <input type="number" th:field="*{massExponent}" placeholder="Например, 23">
                             </label>
                         </div>
@@ -306,7 +306,7 @@
                             <p>Эта группа показывается для планет, спутников, астероидов, комет и метеорных потоков</p>
                         </div>
                         <div class="form-grid">
-                            <label class="field"><span>Большая полуось</span><input type="number" th:field="*{semiaxis}" placeholder="Введите значение"></label>
+                            <label class="field"><span>Большая полуось (в а.е.)</span><input type="number" th:field="*{semiaxis}" placeholder="Введите значение"></label>
                             <label class="field"><span>Эксцентриситет орбиты</span><input type="number" step="any" th:field="*{eccentricity}" placeholder="Введите значение"></label>
                             <label class="field"><span>Наклонение</span><input type="number" step="any" th:field="*{inclination}" placeholder="Введите значение"></label>
                             <label class="field"><span>Долгота восходящего угла</span><input type="number" step="any" th:field="*{longitudeOfAscAngle}" placeholder="Введите значение"></label>
@@ -324,7 +324,7 @@
                         <div class="form-grid">
                             <label class="field">
                                 <span>Тип явления</span>
-                                <select name="eventType">
+                                <select th:field="*{eventType}">
                                     <option value="">Выберите тип</option>
                                     <option value="Затмение">Затмение</option>
                                     <option value="Соединение">Соединение</option>
@@ -336,7 +336,7 @@
                             </label>
                             <label class="field">
                                 <span>Периодичность</span>
-                                <select name="periodicity">
+                                <select th:field="*{periodicity}">
                                     <option value="">Выберите периодичность</option>
                                     <option value="Короткопериодическое">Короткопериодическое</option>
                                     <option value="Долгопериодическое">Долгопериодическое</option>
@@ -345,11 +345,11 @@
                             </label>
                             <label class="field">
                                 <span>Время начала</span>
-                                <input type="date" name="eventStart">
+                                <input type="date" th:field="*{eventStart}">
                             </label>
                             <label class="field">
                                 <span>Время окончания</span>
-                                <input type="date" name="eventEnd">
+                                <input type="date" th:field="*{eventEnd}">
                             </label>
                             <div class="field field-wide">
                                 <div class="dynamic-list-head">
@@ -360,11 +360,11 @@
                                     <div class="linked-object-row">
                                         <label class="field">
                                             <span>Объект из базы</span>
-                                            <input type="text" name="linkedObjectName[]" placeholder="Введите название объекта из базы">
+                                            <input type="text" th:field="*{linkedObjectNames[0]}" placeholder="Введите название объекта из базы">
                                         </label>
                                         <label class="field">
                                             <span>Роль</span>
-                                            <select name="linkedObjectRole[]">
+                                            <select th:field="*{linkedObjectRoles[0]}">
                                                 <option value="">Выберите роль</option>
                                                 <option value="Источник явления">Источник явления</option>
                                                 <option value="Наблюдаемый объект">Наблюдаемый объект</option>
@@ -395,7 +395,7 @@
 
                     <div class="form-actions">
                         <button class="button-submit" type="submit">Отправить на рассмотрение</button>
-                        <p class="form-note">Сохранение сейчас реализовано только для ветки Новый объект.</p>
+                        <p class="form-note">Можно отправлять как новые объекты, так и новые явления.</p>
                     </div>
                 </form>
             </section>

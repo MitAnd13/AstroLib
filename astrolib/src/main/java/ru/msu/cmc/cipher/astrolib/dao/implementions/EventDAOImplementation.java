@@ -5,12 +5,14 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.msu.cmc.cipher.astrolib.dao.EventDAO;
+import ru.msu.cmc.cipher.astrolib.models.AstroObjects;
 import ru.msu.cmc.cipher.astrolib.models.Events;
 import ru.msu.cmc.cipher.astrolib.models.ObjectsToEvents;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 
 @Repository
 @Transactional
@@ -19,12 +21,13 @@ public class EventDAOImplementation extends CommonDAOImplementation<Events, Long
     //поиск по имени
     @Override
     public Events getByName(String name) {
+        String normalizedName = normalizeLower(name);
         try {
             return entityManager.createQuery(
-                "FROM Events e WHERE lower(e.name) = lower(:name)",
+                "FROM Events e WHERE lower(e.name) = :name",
                 Events.class
                 )
-                .setParameter("name", name)
+                .setParameter("name", normalizedName)
                 .getSingleResult();
         } catch (NoResultException exception) {
             return null;
@@ -34,33 +37,36 @@ public class EventDAOImplementation extends CommonDAOImplementation<Events, Long
     //проверка существования
     @Override
     public boolean existsByName(String name) {
+        String normalizedName = normalizeLower(name);
         TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(e) FROM Events e WHERE lower(e.name) = lower(:name)",
+            "SELECT COUNT(e) FROM Events e WHERE lower(e.name) = :name",
             Long.class
         );
-        query.setParameter("name", name);
+        query.setParameter("name", normalizedName);
         return query.getSingleResult() > 0;
     }
 
     //неточный поиск по имени
     @Override
     public Collection<Events> getByNameLike(String namePart) {
+        String normalizedNamePart = "%" + normalizeLower(namePart) + "%";
         return entityManager.createQuery(
-            "FROM Events e WHERE lower(e.name) LIKE lower(:namePart) ORDER BY e.name",
+            "FROM Events e WHERE lower(e.name) LIKE :namePart ORDER BY e.name",
             Events.class
             )
-            .setParameter("namePart", "%" + namePart + "%")
+            .setParameter("namePart", normalizedNamePart)
             .getResultList();
     }
 
     //поиск по типу
     @Override
     public Collection<Events> getByType(String type) {
+        String normalizedType = normalizeLower(type);
         return entityManager.createQuery(
-            "FROM Events e WHERE lower(e.type) = lower(:type) ORDER BY e.start_date, e.name",
+            "FROM Events e WHERE lower(e.type) = :type ORDER BY e.start_date, e.name",
             Events.class
             )
-            .setParameter("type", type)
+            .setParameter("type", normalizedType)
             .getResultList();
     }
 
@@ -149,11 +155,19 @@ public class EventDAOImplementation extends CommonDAOImplementation<Events, Long
     private void persistLinks(Events event, Collection<ObjectsToEvents> objectLinks) {
         for (ObjectsToEvents link : safeLinks(objectLinks)) {
             link.setEvent(event);
+            AstroObjects object = link.getObject();
+            if (object != null && object.getId() != null) {
+                link.setObject(entityManager.getReference(AstroObjects.class, object.getId()));
+            }
             entityManager.persist(link);
         }
     }
 
     private Collection<ObjectsToEvents> safeLinks(Collection<ObjectsToEvents> objectLinks) {
         return objectLinks == null ? Collections.emptyList() : objectLinks;
+    }
+
+    private String normalizeLower(String value) {
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 }
